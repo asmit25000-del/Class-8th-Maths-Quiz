@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Class 8 Maths Quiz — Fixed</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--glass:rgba(255,255,255,0.06);--muted:rgba(255,255,255,0.8)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Poppins',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0b1220,#0f172a,#0ea5a3);color:#fff;padding:28px}
+    .app{max-width:1100px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between}
+    .badge{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ffffff22,#ffffff08);display:grid;place-items:center;color:#071019;font-weight:700}
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:18px}
+    .card{background:var(--glass);border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,0.06)}
+    .topics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .topic{padding:12px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))}
+    .topic h3{margin:0 0 6px;font-size:16px}
+    .topic p{margin:0;color:var(--muted);font-size:13px}
+    .levels{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .btn{padding:8px 12px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn.primary{background:linear-gradient(135deg,#a8ff78,#78ffd6);color:#071019}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.08);color:#fff}
+    dialog{border:none;border-radius:12px;padding:0;overflow:hidden;background:#07101a;color:#fff;width:min(820px,94vw)}
+    dialog::backdrop{background:rgba(0,0,0,0.6)}
+    .modal-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(255,255,255,0.03)}
+    .modal-body{padding:16px;display:grid;gap:12px}
+    .question{background:rgba(255,255,255,0.03);padding:12px;border-radius:10px}
+    .options{display:grid;gap:10px}
+    .opt{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.02);cursor:pointer;border:1px solid rgba(255,255,255,0.04)}
+    .opt.correct{outline:3px solid rgba(73,209,141,0.18);background:rgba(73,209,141,0.06)}
+    .opt.wrong{outline:3px solid rgba(255,107,107,0.12);background:rgba(255,107,107,0.04)}
+    .bar{height:10px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;width:220px}
+    .bar > div{height:100%;background:linear-gradient(90deg,#78ffd6,#a8ff78);width:0%;transition:width .36s}
+    @media (max-width:920px){.grid{grid-template-columns:1fr}.topics-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:560px){.topics-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="badge">8️⃣</div>
+        <div>
+          <h1 style="margin:0">Class 8 — Maths Quiz</h1>
+          <div style="color:var(--muted);font-size:13px">Topic-wise · 5 levels · 10 questions per level</div>
+        </div>
+      </div>
+      <div><button class="btn ghost" id="howBtn">How it works</button></div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2 style="margin:0 0 10px">Choose a topic</h2>
+        <input id="search" placeholder="Search topics..." style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff;margin-bottom:12px">
+        <div class="topics-grid" id="topicGrid"></div>
+      </section>
+
+      <aside class="card">
+        <h3 style="margin:0 0 10px">Progress</h3>
+        <div id="progressList" style="display:grid;gap:10px"></div>
+      </aside>
+    </main>
+  </div>
+
+  <dialog id="quizDialog">
+    <div class="modal-head">
+      <div id="meta">Topic • Level • Qx/10</div>
+      <div><button class="btn ghost" id="closeQuiz">Close</button></div>
+    </div>
+    <div class="modal-body">
+      <div class="question"><div id="qText" style="font-weight:600"></div></div>
+      <div class="options" id="opts"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="color:var(--muted)" id="feedback">Select an option</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="bar"><div id="pbar"></div></div>
+          <button class="btn ghost" id="skipBtn">Skip</button>
+          <button class="btn primary" id="nextBtn" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="resultDialog">
+    <div class="modal-body" style="text-align:center">
+      <h2 id="resultTitle">Result</h2>
+      <div id="resultScore" style="margin-top:6px;font-weight:700">0 / 10</div>
+      <p id="resultNote" style="color:var(--muted)"></p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
+        <button class="btn primary" id="retryBtn">Retry</button>
+        <button class="btn ghost" id="closeResult">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    /* ===== topics and simple generators (10 Qs each) ===== */
+    const TOPICS = [
+      {id:'rational', name:'Rational Numbers', desc:'fractions — add/subtract/simplify'},
+      {id:'linear', name:'Linear Equations', desc:'one-variable equations'},
+      {id:'exponents', name:'Exponents & Powers', desc:'laws of exponents'},
+      {id:'squares', name:'Squares & Square Roots', desc:'squares and roots'},
+      {id:'algebra', name:'Algebraic Expressions', desc:'expand/simplify/identities'},
+      {id:'mensuration', name:'Mensuration', desc:'area, perimeter, volume basics'},
+      {id:'data', name:'Data Handling', desc:'mean, mode, median'},
+      {id:'quant', name:'Comparing Quantities', desc:'percent, ratio, proportion'},
+      {id:'factor', name:'Factorisation', desc:'factorising polynomials'},
+      {id:'quad', name:'Understanding Quadrilaterals', desc:'types & properties'},
+      {id:'geom', name:'Practical Geometry', desc:'simple constructions'},
+      {id:'graphs', name:'Introduction to Graphs', desc:'reading & plotting'}
+    ];
+
+    function makeQ(text, correct, distract=[], isHTML=false){
+      const options = shuffle([correct, ...distract]).slice(0,4);
+      return {text, correct, options, isHTML};
+    }
+    // small set of generators (keeps it deterministic-ish and fast)
+    function genRational(level){ const out=[]; const range = 5 + level*6;
+      for(let i=0;i<10;i++){
+        const a = randS(range), b = rand(1,range), c = randS(range), d = rand(1,range);
+        const num = a*d + c*b, den = b*d; out.push(makeQ(`Compute ( ${a}/${b} ) + ( ${c}/${d} ) and give simplest form.`, simplifyFrac(num,den), [simplifyFrac(num+1,den), simplifyFrac(num-1,den), simplifyFrac(a+c,b+d)]));
+      } return out;
+    }
+    function genLinear(level){ const out=[]; for(let i=0;i<10;i++){ const a=rand(1,3+level), b=rand(0,5+level), c=rand(1,8+level); const x=(c-b)/a; const ans=isInt(x)?String(x):simplifyFrac(c-b,a); out.push(makeQ(`${a}x + ${b} = ${c}. Find x.`, ans, [String(x+1),String(x-1),String(Math.round(x*2))])); } return out;}
+    function genExponents(level){ const out=[]; for(let i=0;i<10;i++){ const a=rand(2,4+level), m=rand(1,2+level), n=rand(1,2+level); out.push(makeQ(`Simplify: ${a}<sup>${m}</sup> × ${a}<sup>${n}</sup>`, `${a}<sup>${m+n}</sup>`, [`${a}<sup>${m*n}</sup>`,`${a}<sup>${Math.abs(m-n)}</sup>`,`${a}<sup>${m+n+1}</sup>`], true)); } return out; }
+    function genSquares(level){ const out=[]; for(let i=0;i<10;i++){ const n=rand(3*level+2,3*level+17); out.push(makeQ(`Find the square of ${n}.`, String(n*n), [String((n+1)*(n+1)), String((n-1)*(n-1)), String(n*(n+2))])); } return out; }
+    function genAlgebra(level){ const out=[]; for(let i=0;i<10;i++){ const a=rand(1,4), b=rand(1,6), c=rand(1,5); const A=a*c, B=a*a + b*c, C=a*b; const ans=`${A}x² + ${B}x + ${C}`; out.push(makeQ(`Expand: (${a}x + ${b})(${c}x + ${a})`, ans, [`${A}x² + ${B+1}x + ${C}`, `${A+1}x² + ${B}x + ${C}`, `${A}x² + ${B}x + ${C+1}`], true)); } return out; }
+    function genMensuration(level){ const out=[]; for(let i=0;i<10;i++){ const l=rand(5,10+level*4), w=rand(4,8+level*3); out.push(makeQ(`Rectangle length ${l} cm & width ${w} cm. Area?`, `${l*w} cm²`, [`${2*(l+w)} cm`, `${l+w} cm²`, `${(l*w)+rand(1,8)} cm²`])) } return out; }
+    function genData(level){ const out=[]; for(let i=0;i<10;i++){ const a=rand(1,10), b=rand(1,10), c=rand(1,10); const mean = ((a+b+c)/3).toFixed(1); out.push(makeQ(`Find mean of ${a}, ${b}, ${c}.`, String(mean), [String(((a+b+c+1)/3).toFixed(1)), String(((a+b+c-1)/3).toFixed(1)), String(Math.max(a,b,c))])); } return out; }
+    function genQuant(level){ const out=[]; for(let i=0;i<10;i++){ const whole=rand(50,200), part=Math.round(whole*(rand(10,90)/100)); const pct=Math.round((part/whole)*100); out.push(makeQ(`${part} is what percent of ${whole}?`, `${pct}%`, [`${pct+1}%`, `${Math.max(1,pct-2)}%`, `${Math.round((part/whole)*1000)/10}%`])) } return out; }
+    function genFactor(level){ const out=[]; for(let i=0;i<10;i++){ const a=rand(1,6), b=rand(1,6); out.push(makeQ(`Factorise: x² + ${a+b}x + ${a*b}`, `(x + ${a})(x + ${b})`, [`(x+${a+b})(x+1)`,`(x-${a})(x-${b})`,`(x+${a})(x-${b})`], true)); } return out; }
+    function genQuad(){ const out=[]; for(let i=0;i<10;i++){ out.push(makeQ(`Which quadrilateral has all sides equal and opposite angles equal?`, `Rhombus`, [`Square`,`Rectangle`,`Trapezium`])); } return out; }
+    function genGeom(){ const out=[]; for(let i=0;i<10;i++){ const a=rand(20,80); out.push(makeQ(`Angle in triangle is ${a}°. Complement?`, `${90-a}°`, [`${180-a}°`, `${a}°`, `${a+10}°`])); } return out; }
+    function genGraphs(){ const out=[]; for(let i=0;i<10;i++){ const x=rand(1,8); out.push(makeQ(`Point (${x}, ${x}) lies on which line?`, `y = x`, [`y = ${x}`,'y = 2x','x = y+1'])); } return out; }
+
+    const GENERATORS = { rational: genRational, linear: genLinear, exponents: genExponents, squares: genSquares, algebra: genAlgebra, mensuration: genMensuration, data: genData, quant: genQuant, factor: genFactor, quad: genQuad, geom: genGeom, graphs: genGraphs };
+
+    /* ===== utilities ===== */
+    function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min }
+    function randS(n){ return Math.random()<0.5?-rand(1,n):rand(1,n) }
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+    function gcd(a,b){ return b?gcd(b,a%b):a }
+    function simplifyFrac(num,den){ const g=gcd(Math.abs(num),Math.abs(den)); let n=num/g, d=den/g; if(d<0){ n=-n; d=-d } return `${n}/${d}` }
+    function isInt(x){ return Math.abs(x-Math.round(x))<1e-9 }
+    function stripHTML(s){ const d=document.createElement('div'); d.innerHTML = s; return d.textContent || d.innerText || '' }
+    function normalizeText(s){ return String(stripHTML(s)).replace(/\s+/g,' ').trim() }
+
+    /* ===== local storage for progress ===== */
+    const storage = {
+      get(){ return JSON.parse(localStorage.getItem('c8-progress')||'{}') },
+      set(d){ localStorage.setItem('c8-progress', JSON.stringify(d)) },
+      push(topic, level, score){ const d=this.get(); d[topic]=d[topic]||[]; d[topic].push({ts:Date.now(), level, score}); this.set(d); }
+    };
+
+    /* ===== render UI ===== */
+    const topicGrid = document.getElementById('topicGrid'), progressList = document.getElementById('progressList'), search = document.getElementById('search');
+    function renderTopics(filter=''){ topicGrid.innerHTML=''; TOPICS.filter(t=>t.name.toLowerCase().includes(filter.toLowerCase())).forEach(t=>{ const el=document.createElement('div'); el.className='topic'; el.innerHTML=`<h3>${t.name}</h3><p>${t.desc}</p>`; const levels=document.createElement('div'); levels.className='levels'; for(let L=1;L<=5;L++){ const b=document.createElement('button'); b.className='btn ghost'; b.textContent=`L${L}`; b.addEventListener('click', ()=> startQuiz(t.id, L)); levels.appendChild(b); } el.appendChild(levels); topicGrid.appendChild(el); }) }
+    function renderProgress(){ progressList.innerHTML=''; const d = storage.get(); TOPICS.forEach(t=>{ const attempts = d[t.id]||[]; const best = attempts.reduce((m,it)=>Math.max(m,it.score||0),0); const row=document.createElement('div'); row.innerHTML=`<div style="display:flex;justify-content:space-between"><strong>${t.name}</strong><small style="color:var(--muted)">Best: ${best}/10</small></div>`; const bar=document.createElement('div'); bar.className='bar'; const inner=document.createElement('div'); inner.style.width=`${(best/10)*100}%`; bar.appendChild(inner); row.appendChild(bar); progressList.appendChild(row); }) }
+    search.addEventListener('input', e=> renderTopics(e.target.value)); document.getElementById('howBtn').addEventListener('click', ()=> alert('Pick a topic → choose level → answer 10 MCQs. Progress saved locally.'));
+
+    /* ===== quiz flow ===== */
+    const dialog = document.getElementById('quizDialog'), qText = document.getElementById('qText'), opts = document.getElementById('opts'), meta = document.getElementById('meta'), feedback = document.getElementById('feedback'), pbar = document.getElementById('pbar'), nextBtn = document.getElementById('nextBtn'), skipBtn = document.getElementById('skipBtn');
+    let QUIZ = { topicId:null, level:1, questions:[], idx:0, score:0, answered:false };
+
+    function startQuiz(topicId, level){
+      const gen = GENERATORS[topicId] || (()=>{ const a=[]; for(let i=0;i<10;i++) a.push(makeQ('Placeholder Q','A',['B','C','D'])); return a; });
+      QUIZ = { topicId, level, questions: gen(level), idx:0, score:0, answered:false };
+      updateMeta(); renderQuestion(); feedback.textContent='Select an option'; nextBtn.disabled=true; dialog.showModal();
+    }
+
+    function updateMeta(){ const t = TOPICS.find(x=>x.id===QUIZ.topicId); meta.textContent = `${t ? t.name : QUIZ.topicId} • Level ${QUIZ.level} • Q${QUIZ.idx+1}/10`; }
+
+    function clearOptions(){ while(opts.firstChild) opts.removeChild(opts.firstChild); }
+
+    function renderQuestion(){
+      try{
+        clearOptions();
+        const q = QUIZ.questions[QUIZ.idx];
+        updateMeta();
+        pbar.style.width = `${(QUIZ.idx/10)*100}%`;
+        if(q.isHTML){ qText.innerHTML = q.text; } else { qText.textContent = q.text; }
+        q.options.forEach(opt => {
+          const el = document.createElement('div'); el.className='opt';
+          if(q.isHTML) el.innerHTML = opt; else el.textContent = opt;
+          el.addEventListener('click', ()=> handleSelect(el, opt));
+          opts.appendChild(el);
+        });
+        QUIZ.answered = false; nextBtn.disabled = true; feedback.textContent = 'Select an option';
+      } catch(err){ console.error(err); alert('Error rendering question — check console'); }
+    }
+
+    function handleSelect(domElem, value){
+      if(QUIZ.answered) return;
+      QUIZ.answered = true;
+      const q = QUIZ.questions[QUIZ.idx];
+      const correct = normalizeText(value) === normalizeText(q.correct);
+      if(correct){ QUIZ.score++; feedback.textContent = 'Correct!'; }
+      else { feedback.textContent = `Wrong. Correct: ${stripHTML(q.correct)}`; }
+      // mark options: clear then add classes
+      Array.from(opts.children).forEach(ch => {
+        ch.classList.remove('correct','wrong');
+        if(normalizeText(ch.textContent || ch.innerText) === normalizeText(q.correct)) ch.classList.add('correct');
+        else if(ch === domElem) ch.classList.add('wrong');
+      });
+      nextBtn.disabled = false;
+    }
+
+    function goNext(){
+      QUIZ.idx++;
+      if(QUIZ.idx < 10){ renderQuestion(); updateMeta(); }
+      else finishQuiz();
+    }
+
+    function finishQuiz(){
+      storage.push(QUIZ.topicId, QUIZ.level, QUIZ.score);
+      renderProgress();
+      dialog.close();
+      document.getElementById('resultScore').textContent = `${QUIZ.score} / 10`;
+      const pct = Math.round((QUIZ.score/10)*100);
+      document.getElementById('resultTitle').textContent = pct>=80? 'Excellent! 🎉' : (pct>=60? 'Good job! ✅' : 'Keep practicing 💪');
+      document.getElementById('resultNote').textContent = pct>=80? 'Ready to move up a level.' : (pct>=60? 'Try to get 80%+.' : 'Practice and retry.');
+      document.getElementById('resultDialog').showModal();
+    }
+
+    nextBtn.addEventListener('click', goNext);
+    skipBtn.addEventListener('click', ()=>{ if(!QUIZ.answered) feedback.textContent='Skipped'; goNext(); });
+    document.getElementById('closeQuiz').addEventListener('click', ()=> dialog.close());
+    document.getElementById('closeResult').addEventListener('click', ()=> document.getElementById('resultDialog').close());
+    document.getElementById('retryBtn').addEventListener('click', ()=>{ document.getElementById('resultDialog').close(); startQuiz(QUIZ.topicId, QUIZ.level); });
+
+    // init
+    renderTopics(); renderProgress();
+
+    // expose quick debugger API
+    window.__QUIZ = { start: startQuiz };
+  </script>
+</body>
+</html>
